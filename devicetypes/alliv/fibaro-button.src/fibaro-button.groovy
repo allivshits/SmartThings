@@ -38,7 +38,7 @@ metadata
                     }
                 valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat")
                     {
-                        state "default", label: "configure", backgroundColor: "#ffffff", action: "configure", icon: "st.secondary.configure"
+                        state "default", backgroundColor: "#ffffff", action: "configure", icon: "st.secondary.configure"
                     }
 
                 main "button"
