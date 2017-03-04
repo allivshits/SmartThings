@@ -1,3 +1,4 @@
+
 /**
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -13,11 +14,18 @@
 
 metadata
 {
-    definition (name: "Leviton Programmer", namespace: "alliv", author: "Aleksandr Livhshits") 
+    definition (name: "Leviton Dimmer Programmer", namespace: "alliv", author: "Aleksandr Livhshits") 
     {
         command "updateSettings"
         
         fingerprint inClusters: "0x26"
+    }
+    preferences
+    {
+        input ( "loadType", "number", title: "Load Type", defaultValue: 10, range: "0..3", required: true)
+        input ( "fadeOn", "number", title: "Fade On Time", defaultValue: 0, range: "0..253", required: true)
+        input ( "fadeOff", "number", title: "Fade On Time", defaultValue: 0, range: "0..253", required: true)
+        input ( "minLevel", "number", title: "Minimum Level", defaultValue: 10, range: "0..100", required: true)
     }
     
     tiles(scale: 2)
@@ -39,3 +47,4 @@ def updateSettings()
     
     delayBetween(cmds, 500)
 }
+
