@@ -16,6 +16,8 @@ metadata
 {
     definition (name: "Leviton Dimmer Programmer", namespace: "alliv", author: "Aleksandr Livhshits") 
     {
+        capability "Configuration" 
+        
         command "updateSettings"
         
         fingerprint inClusters: "0x26"
