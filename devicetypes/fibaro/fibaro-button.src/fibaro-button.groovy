@@ -1,5 +1,4 @@
 /**
- *  Copyright 2016 AdamV
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -24,7 +23,6 @@ metadata {
 		capability "Button"
         capability "Battery"
 		capability "Configuration" 
-       	capability "Refresh"
         
         command "describeAttributes"
         
@@ -42,51 +40,39 @@ metadata {
         // need to redo simulator commands
 
 	}
-	tiles (scale: 2){
-		
-        multiAttributeTile(name:"button", type:"generic", width:6, height:4) {
-  			tileAttribute("device.button", key: "PRIMARY_CONTROL"){
-    		attributeState "default", label:'Fibaro Button', backgroundColor:"#44b621", icon:"st.Home.home30"
-            attributeState "held", label: "holding", backgroundColor: "#C390D4"
-  			}
-            tileAttribute ("device.battery", key: "SECONDARY_CONTROL") {
-			attributeState "battery", label:'${currentValue} % battery'
+	tiles (scale: 2)
+    {
+        multiAttributeTile(name:"button", type:"generic", width:6, height:4)
+        {
+            tileAttribute("device.button", key: "PRIMARY_CONTROL")
+            {
+                attributeState "default", label:'Fibaro Button', backgroundColor:"#44b621", icon:"st.Home.home30"
+                attributeState "held", label: "holding", backgroundColor: "#C390D4"
             }
-            
+            tileAttribute ("device.battery", key: "SECONDARY_CONTROL")
+            {
+                attributeState "battery", label:'${currentValue} % battery'
+            }
         }
-		//standardTile("button", "device.button", width: 6, height: 4) {
-		//	state "default", label: "", icon: "st.Home.home30", backgroundColor: "#ffffff"
-        //    state "held", label: "holding", icon: "st.Home.home30", backgroundColor: "#C390D4"
-       // } 
-    	//valueTile("battery", "device.battery", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
-         //tileAttribute ("device.battery", key: "PRIMARY_CONTROL"){
-          // state "battery", label:'${currentValue}% battery', unit:""
-        //}
-        //}
-        valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat") {
-			state "default", label: "configure", backgroundColor: "#ffffff", action: "configure", icon:"st.secondary.configure"
+        valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat") 
+        {
+            state "default", label: "configure", backgroundColor: "#ffffff", action: "configure", icon:"st.secondary.configure"
         }
         
         main "button"
-		details(["button", "configure"])
-	}
+        details(["button", "configure"])
+    }
 }
 
-
-
-def parse(String description) {
-	def results = []
-    log.debug("RAW command: $description")
-    //def cmd = zwave.parse(description.replace("98C1", "9881")/*, [0x98: 1, 0x20: 1, 0x84: 1, 0x80: 1, 0x60: 3, 0x2B: 1, 0x26: 1]*/)
+def parse(String description) 
+{
+    def results = []
+    log.debug "RAW command: $description"
     def cmd = zwave.parse(description)
     log.debug "Parsed Command: $cmd"
     if (cmd) {
         results = zwaveEvent(cmd)
-    }
-    if (!state.numberOfButtons ) {
-        state.numberOfButtons = "5"
-        createEvent(name: "numberOfButtons", value: "5", displayed: false)
-    }
+    }    
 }
   
 def describeAttributes(payload) {
@@ -262,22 +248,28 @@ def zwaveEvent(physicalgraph.zwave.commands.configurationv2.ConfigurationReport 
 
 }
 
-
-  def configure() {
-    
+def configure()
+{
     log.debug "Resetting Sensor Parameters to SmartThings Compatible Defaults"
-	def cmds = []
+    
+    if (!state.numberOfButtons )
+    {
+        state.numberOfButtons = "5"
+        createEvent(name: "numberOfButtons", value: "5", displayed: false)
+    }
+    
+    def cmds = []
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId).format()
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06).format()
     //cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06).format()
     //cmds << zwave.associationV1.associationSet(groupingIdentifier: 3, nodeId: zwaveHubNodeId).format()
     //cmds << zwave.associationV1.associationSet(groupingIdentifier: 4, nodeId: zwaveHubNodeId).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1).format()
-	cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1).format()
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [7], parameterNumber: 3, size: 1).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 30, size: 1).format()
-    cmds << zwave.configurationV1.configurationGet(parameterNumber: 1).format()  
-	log.debug "$cmds"
+    cmds << zwave.configurationV1.configurationGet(parameterNumber: 1).format()
     
+    log.debug "$cmds"
     delayBetween(cmds, 500)
 }
