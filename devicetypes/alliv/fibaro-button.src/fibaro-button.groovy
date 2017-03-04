@@ -70,7 +70,9 @@ def zwaveEvent(physicalgraph.zwave.commands.securityv1.SecurityMessageEncapsulat
 def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd)
 {
     [createEvent(descriptionText: "${device.displayName} woke up"),
-     response(zwave.wakeUpV2.wakeUpNoMoreInformation())]
+     response(secure(zwave.batteryV1.batteryGet())),
+     response(secure(zwave.wakeUpV2.wakeUpNoMoreInformation())),
+    ]
 
     log.debug("Button Woke Up!")
 }
@@ -111,22 +113,22 @@ def configure()
     log.debug "Resetting Sensor Parameters to SmartThings Compatible Defaults"
 
     def cmds = []
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId).format()
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: zwaveHubNodeId).format()
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: zwaveHubNodeId).format()
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 3, nodeId: zwaveHubNodeId).format()
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 4, nodeId: zwaveHubNodeId).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [255], parameterNumber: 11, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 12, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 14, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 20, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 22, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 24, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 29, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 30, size: 1).format()
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: zwaveHubNodeId)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: zwaveHubNodeId)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 3, nodeId: zwaveHubNodeId)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 4, nodeId: zwaveHubNodeId)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [255], parameterNumber: 11, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 12, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 14, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 20, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 22, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 24, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 29, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 30, size: 1)
 
     execCommands(cmds)
 }
