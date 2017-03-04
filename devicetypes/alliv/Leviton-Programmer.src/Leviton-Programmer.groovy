@@ -11,29 +11,28 @@
  *
  */
 
-metadata {
-	definition (name: "Leviton Programmer", namespace: "alliv", author: "Aleksandr Livhshits") {
-       
-        command "updateSettings"
-
-		fingerprint inClusters: "0x26"
-	}
-
-	tiles(scale: 2) 
+metadata
+{
+    definition (name: "Leviton Programmer", namespace: "alliv", author: "Aleksandr Livhshits") 
     {
-        standardTile("updateSettings", "device.updateSettings", height: 2, width: 2, inactiveLabel: false, decoration: "flat") 
+        command "updateSettings"
+        
+        fingerprint inClusters: "0x26"
+    }
+    
+    tiles(scale: 2)
+    {
+        standardTile("updateSettings", "device.updateSettings", height: 2, width: 2, inactiveLabel: false, decoration: "flat")
         {
-        	state "default" , action:"updateSettings", icon:"st.secondary.configure"
+            state "default" , action:"updateSettings", icon:"st.secondary.configure"
         }
-
-
-		main(["updateSettings"])
-	}
+        main(["updateSettings"])
+    }
 }
-
-def updateSettings() {
-	log.debug("Updating Switch Settings")
-	
+def updateSettings()
+{
+    log.debug("Updating Switch Settings")
+    
     def cmds = []
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 1, size: 1).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 2, size: 1).format()
