@@ -114,10 +114,8 @@ def configure()
 
     def cmds = []
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId)
-    cmds << zwave.associationV1.associationRemove(groupingIdentifier: 2, nodeId: zwaveHubNodeId)
-    cmds << zwave.associationV1.associationRemove(groupingIdentifier: 2, nodeId: zwaveHubNodeId)
-    cmds << zwave.associationV1.associationRemove(groupingIdentifier: 3, nodeId: zwaveHubNodeId)
-    cmds << zwave.associationV1.associationRemove(groupingIdentifier: 4, nodeId: zwaveHubNodeId)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x0C)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1)
