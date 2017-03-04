@@ -99,7 +99,13 @@ def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd)
     }
     createEvent(map)
 }
+def secure(physicalgraph.zwave.Command cmd) {
+    zwave.securityV1.securityMessageEncapsulation().encapsulate(cmd).format()
+}
 
+def execCommands(commands, delay=200) {
+    delayBetween(commands.collect{ secure(it) }, delay)
+}
 def configure()
 {
     log.debug "Resetting Sensor Parameters to SmartThings Compatible Defaults"
@@ -121,8 +127,6 @@ def configure()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 24, size: 1).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 29, size: 1).format()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 30, size: 1).format()
-    cmds << zwave.configurationV1.configurationGet(parameterNumber: 1).format()
 
-    log.debug "$cmds"
-    delayBetween(cmds, 500)
+    execCommands(cmds)
 }
