@@ -9,38 +9,21 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *
- *  Version 0.9.1
- *  Author: AdamV
- *  Date: 2016-09-10
- *
- * 
  */
- 
-metadata {
-	definition (name: "Fibaro Button", namespace: "Fibaro", author: "AdamV") {
-		capability "Actuator"
-		capability "Button"
+
+metadata
+{
+    definition (name: "Fibaro Button", namespace: "alliv", author: "Aleksandr Livshits")
+    {
+        capability "Actuator"
+        capability "Button"
         capability "Battery"
-		capability "Configuration" 
+        capability "Configuration"
         
-        command "describeAttributes"
-        
-		attribute "numberOfButtons", "number"
-        attribute "buttonClicks", "enum", ["one click", "two clicks", "three clicks", "four clicks", "five clicks", "hold start", "hold release"]
-        attribute "holdLevel", "number"
-
-		fingerprint deviceId: "0x1801", inClusters: "0x5E, 0x86, 0x72, 0x5B, 0x5A, 0x59, 0x85, 0x73, 0x84, 0x80, 0x71, 0x56, 0x70, 0x8E, 0x7A, 0x98", outClusters: "0x26, 0x9C"
-							
-   }
-
-	simulator {
-		status "button 1 pushed":  "command: 9881, payload: 00 5B 03 DE 00 01"
-		
-        // need to redo simulator commands
-
-	}
-	tiles (scale: 2)
+        fingerprint deviceId: "0x1801", inClusters: "0x5E, 0x86, 0x72, 0x5B, 0x5A, 0x59, 0x85, 0x73, 0x84, 0x80, 0x71, 0x56, 0x70, 0x8E, 0x7A, 0x98", outClusters: "0x26, 0x9C"
+    }
+    
+    tiles (scale: 2)
     {
         multiAttributeTile(name:"button", type:"generic", width:6, height:4)
         {
@@ -54,7 +37,7 @@ metadata {
                 attributeState "battery", label:'${currentValue} % battery'
             }
         }
-        valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat") 
+        valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat")
         {
             state "default", label: "configure", backgroundColor: "#ffffff", action: "configure", icon:"st.secondary.configure"
         }
