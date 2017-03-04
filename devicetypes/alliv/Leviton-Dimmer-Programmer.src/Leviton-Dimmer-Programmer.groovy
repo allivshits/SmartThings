@@ -44,8 +44,10 @@ def updateSettings()
     log.debug("Updating Switch Settings")
     
     def cmds = []
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 1, size: 1).format()
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 2, size: 1).format()
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [loadType], parameterNumber: 8, size: 1).format()
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [fadeOn], parameterNumber: 1, size: 1).format()
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [fadeOff], parameterNumber: 2, size: 1).format()
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [minLevel], parameterNumber: 3, size: 1).format()
     
     delayBetween(cmds, 500)
 }
