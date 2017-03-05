@@ -11,6 +11,8 @@
  *
  */
 
+import java.time.temporal.ChronoUnit
+
 metadata
     {
         definition(name: "Fibaro Button", namespace: "alliv", author: "Aleksandr Livshits")
@@ -69,10 +71,10 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
     log.debug("Button Woke Up!")
     def results = [createEvent(descriptionText: "$device.displayName woke up", isStateChange: false)]
     def prevBattery = device.currentState("battery")
-    if (!prevBattery ||
-        java.time.temporal.ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 24)
+    if (!prevBattery || ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 24)
     {
-        results << response(secure(esponse(zwave.batteryV1.batteryGet())))
+        log.debug "Last battery report: $prevBattery.date"
+        results << secure(zwave.batteryV1.batteryGet())
     }
     results << response(secure(zwave.wakeUpV1.wakeUpNoMoreInformation()))
     return results
@@ -111,15 +113,33 @@ def secure(physicalgraph.zwave.Command cmd) {
 def execCommands(commands, delay=200) {
     delayBetween(commands.collect{ secure(it) }, delay)
 }
+
+def removeBonds()
+{
+    execCommands([secure(zwave.associationV1.associationGet(groupingIdentifier: 2))])
+}
+
+def zwaveEvent(physicalgraph.zwave.commands.associationv1.AssociationReport cmd)
+{
+    log.debug "Associated nodes: $cmd.nodeid"
+}
+
+
+def setupBonds()
+{
+    def cmds = []
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06)
+    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x0C)
+    execCommands(cmds)
+}
+
 def configure()
 {
-    log.debug "Resetting Sensor Parameters to SmartThings Compatible Defaults"
+    log.debug "Resetting Sensor Parameters"
 
     def cmds = []
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId)
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06)
-    cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x0C)
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [127], parameterNumber: 1, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [31], parameterNumber: 1, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [255], parameterNumber: 11, size: 1)
