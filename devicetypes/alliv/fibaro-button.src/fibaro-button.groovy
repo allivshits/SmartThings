@@ -116,7 +116,7 @@ def execCommands(commands, delay=200) {
 
 def removeBonds()
 {
-    execCommands([secure(zwave.associationV1.associationGet(groupingIdentifier: 2))])
+    execCommands([secure(zwave.associationV1.associationGet(groupingIdentifier: 2 ))])
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.associationv1.AssociationReport cmd)
