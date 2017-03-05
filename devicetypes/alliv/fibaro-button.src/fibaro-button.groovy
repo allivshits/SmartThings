@@ -48,9 +48,7 @@ metadata
 
 def parse(String description)
 {
-    log.debug "RAW command: $description"
     def cmd = zwave.parse(description)
-    log.debug "Parsed Command: $cmd"
     if (cmd)
     {
         return zwaveEvent(cmd)
@@ -62,29 +60,34 @@ def zwaveEvent(physicalgraph.zwave.commands.securityv1.SecurityMessageEncapsulat
     def encapsulatedCommand = cmd.encapsulatedCommand()
     if (encapsulatedCommand)
     {
-        log.debug("UnsecuredCommand: $encapsulatedCommand")
         return zwaveEvent(encapsulatedCommand)
     }
 }
 
-def zwaveEvent(physicalgraph.zwave.commands.wakeupv2.WakeUpNotification cmd)
+def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
 {
-    [createEvent(descriptionText: "${device.displayName} woke up"),
-     response(secure(zwave.batteryV1.batteryGet())),
-     response(secure(zwave.wakeUpV2.wakeUpNoMoreInformation())),
-    ]
-
     log.debug("Button Woke Up!")
+    def results = [createEvent(descriptionText: "$device.displayName woke up", isStateChange: false)]
+    def prevBattery = device.currentState("battery")
+    if (!prevBattery ||
+        java.time.temporal.ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 24)
+    {
+        results << response(secure(esponse(zwave.batteryV1.batteryGet())))
+    }
+    results << response(secure(zwave.wakeUpV1.wakeUpNoMoreInformation()))
+    return results
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.centralscenev1.CentralSceneNotification cmd)
 {
-    log.debug("keyAttributes: $cmd.keyAttributes")
-    log.debug("sceneNumber: $cmd.sceneNumber")
-    log.debug("sequenceNumber: $cmd.sequenceNumber")
-    log.debug("payload: $cmd.payload")
+    log.debug "keyAttributes: $cmd.keyAttributes"
+    log.debug "sceneNumber: $cmd.sceneNumber"
+    log.debug "sequenceNumber: $cmd.sequenceNumber"
+    log.debug "payload: $cmd.payload"
 
-    createEvent(name: "button", value: "pushed", data: [buttonNumber: cmd.keyAttributes], descriptionText: "$device.displayName button $button was pushed", isStateChange: true)
+    def bttn = $cmd.keyAttributes == 0 ? 1 : $cmd.keyAttributes - 1
+
+    createEvent(name: "button", value: "pushed", data: [buttonNumber: $bttn], descriptionText: $/$device.displayName button $bttn was pushed/$, isStateChange: true)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.batteryv1.BatteryReport cmd)
@@ -116,7 +119,7 @@ def configure()
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId)
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x06)
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 2, nodeId: 0x0C)
-    cmds << zwave.configurationV1.configurationSet(configurationValue: [1], parameterNumber: 1, size: 1)
+    cmds << zwave.configurationV1.configurationSet(configurationValue: [127], parameterNumber: 1, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 3, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [3], parameterNumber: 10, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [255], parameterNumber: 11, size: 1)
