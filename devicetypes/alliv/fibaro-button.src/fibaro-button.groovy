@@ -11,7 +11,6 @@
  *
  */
 
-import java.time.temporal.ChronoUnit
 
 metadata
 {
@@ -76,7 +75,7 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
     {
         stale = true
     }
-    if (!stale && ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 6)
+    if (!stale && java.time.temporal.ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 6)
     {
         log.debug "Last battery report: $prevBattery.date"
         stale = true
