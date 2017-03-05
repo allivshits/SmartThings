@@ -14,39 +14,39 @@
 import java.time.temporal.ChronoUnit
 
 metadata
+{
+    definition(name: "Fibaro Button", namespace: "alliv", author: "Aleksandr Livshits")
     {
-        definition(name: "Fibaro Button", namespace: "alliv", author: "Aleksandr Livshits")
-            {
-                capability "Actuator"
-                capability "Button"
-                capability "Battery"
-                capability "Configuration"
+        capability "Actuator"
+        capability "Button"
+        capability "Battery"
+        capability "Configuration"
 
-                fingerprint deviceId: "0x1801", inClusters: "0x5E, 0x86, 0x72, 0x5B, 0x5A, 0x59, 0x85, 0x73, 0x84, 0x80, 0x71, 0x56, 0x70, 0x8E, 0x7A, 0x98", outClusters: "0x26, 0x9C"
-            }
-
-        tiles(scale: 2)
-            {
-                multiAttributeTile(name: "button", type: "generic", width: 6, height: 4)
-                    {
-                        tileAttribute("device.button", key: "PRIMARY_CONTROL")
-                            {
-                                attributeState "default", label: 'Fibaro Button', backgroundColor: "#44b621", icon: "st.Home.home30"
-                            }
-                        tileAttribute("device.battery", key: "SECONDARY_CONTROL")
-                            {
-                                attributeState "battery", label: '${currentValue} % battery'
-                            }
-                    }
-                valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat")
-                    {
-                        state "default", backgroundColor: "#ffffff", action: "configure", icon: "st.secondary.configure"
-                    }
-
-                main "button"
-                details(["button", "configure"])
-            }
+        fingerprint deviceId: "0x1801", inClusters: "0x5E, 0x86, 0x72, 0x5B, 0x5A, 0x59, 0x85, 0x73, 0x84, 0x80, 0x71, 0x56, 0x70, 0x8E, 0x7A, 0x98", outClusters: "0x26, 0x9C"
     }
+
+    tiles(scale: 2)
+    {
+        multiAttributeTile(name: "button", type: "generic", width: 6, height: 4)
+        {
+            tileAttribute("device.button", key: "PRIMARY_CONTROL")
+            {
+                attributeState "default", label: 'Fibaro Button', backgroundColor: "#44b621", icon: "st.Home.home30"
+            }
+            tileAttribute("device.battery", key: "SECONDARY_CONTROL")
+            {
+                attributeState "battery", label: '${currentValue} % battery'
+            }
+        }
+        valueTile("configure", "device.button", width: 2, height: 2, decoration: "flat")
+        {
+            state "default", backgroundColor: "#ffffff", action: "setupBonds", icon: "st.secondary.configure"
+        }
+
+        main "button"
+        details(["button", "configure"])
+    }
+}
 
 def parse(String description)
 {
@@ -71,9 +71,18 @@ def zwaveEvent(physicalgraph.zwave.commands.wakeupv1.WakeUpNotification cmd)
     log.debug("Button Woke Up!")
     def results = [createEvent(descriptionText: "$device.displayName woke up", isStateChange: false)]
     def prevBattery = device.currentState("battery")
-    if (!prevBattery || ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 24)
+    def stale = false
+    if (!prevBattery)
+    {
+        stale = true
+    }
+    if (!stale && ChronoUnit.HOURS.between(new Date(), prevBattery.date) >= 6)
     {
         log.debug "Last battery report: $prevBattery.date"
+        stale = true
+    }
+    if (stale)
+    {
         results << secure(zwave.batteryV1.batteryGet())
     }
     results << response(secure(zwave.wakeUpV1.wakeUpNoMoreInformation()))
@@ -135,7 +144,7 @@ def setupBonds()
 
 def configure()
 {
-    log.debug "Resetting Sensor Parameters"
+    sendEvent(name: "numberOfButtons", value: 5)
 
     def cmds = []
     cmds << zwave.associationV1.associationSet(groupingIdentifier: 1, nodeId: zwaveHubNodeId)
@@ -151,5 +160,6 @@ def configure()
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 29, size: 1)
     cmds << zwave.configurationV1.configurationSet(configurationValue: [0], parameterNumber: 30, size: 1)
 
+    log.debug "Resetting Sensor Parameters"
     execCommands(cmds)
 }
